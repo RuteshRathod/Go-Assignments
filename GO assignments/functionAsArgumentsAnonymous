@@ -1,0 +1,17 @@
+package main
+
+import "fmt"
+
+var funcVar func(int) int
+
+func applyIt(afunction func(int) int, val int) int {
+	return afunction(val)
+}
+
+func main() {
+	r := applyIt(func(x int) int {
+		return x + 3
+	}, 5)
+	fmt.Println(r)
+
+}

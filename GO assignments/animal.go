@@ -8,8 +8,10 @@ import (
 )
 
 // Generic Animal Struct
-type Animal struct {
-	food, locomotion, noise string
+type Animal interface {
+	Eat()
+	Move()
+	Speak()
 }
 
 // receiver of eat

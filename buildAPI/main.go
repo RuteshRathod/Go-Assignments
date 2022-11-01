@@ -3,7 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 // file means it should be in different files
@@ -58,5 +61,35 @@ func getOneCourse(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	json.NewEncoder(w).Encode("No Course Found for id: ", params["id"])
+	return
+}
+
+func createCourse(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Single Course")
+	w.Header().Set("Content-Type", "application/json")
+
+	// validation/ helper : what if body is empty
+
+	if r.Body == nil {
+		json.NewEncoder(w).Encode("Empty Data is not Accepted")
+	}
+
+	// what if body has empty paranthesis"{}", as it would be consider something
+	var course Course // refernece of struct as object
+	_ = json.NewDecoder(r.Body).Decode(&course)
+
+	if course.IsEmpty() {
+		json.NewEncoder(w).Encode("Empty Data{} is not Accepted")
+		return
+	}
+
+	// generate random unique id, which would be string according to struct
+	// then append that input of cousre into slice of main Course
+
+	rand.Seed(time.Now().Unix())
+	//converted int into string with random id
+	course.CourseId = strconv.Itoa(rand.Intn(1000))
+	coursesDB = append(coursesDB, course)
+	json.NewEncoder(w).Encode(course)
 	return
 }

@@ -93,3 +93,31 @@ func createCourse(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(course)
 	return
 }
+
+func updateCourse(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Update Single Course")
+	w.Header().Set("Content-Type", "application/json")
+
+	// grab the id from request
+	params := mux.Vars(r)
+
+	// loop, id, remove, add/update with Id
+	// 1. Loop
+	for index, course := range coursesDB {
+		//2. Match Id
+		if course.CourseId == params["id"] {
+			// removed the course basis on the id given in request, with varidic function of append()
+			coursesDB = append(coursesDB[:index], coursesDB[index+1:]...)
+			// add
+			var course Course // refernece of Course struct as object
+			_ = json.NewDecoder(r.Body).Decode(&course)
+			course.CourseId = params["id"]
+			coursesDB = append(coursesDB, course)
+			json.NewEncoder(w).Encode(course)
+			return
+		} else {
+			json.NewEncoder(w).Encode("No Course Found for id:", params["id"])
+			return
+		}
+	}
+}

@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 // file means it should be in different files
@@ -120,4 +122,28 @@ func updateCourse(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+}
+
+func deleteOneCourse(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Delete single course")
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+	// loop, id, remove
+
+	for index, course := range coursesDB {
+		if course.CourseId == params["id"] {
+			coursesDB = append(coursesDB[:index], coursesDB[index+1:]...)
+			json.NewEncoder(w).Encode("Course has been deleted for id:", params["id"])
+			return
+			// As deletion happened we have to break the loop as conditon has been satiesfied
+			break
+
+		}
+	}
+
+}
+
+func main() {
+
 }

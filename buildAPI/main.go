@@ -80,13 +80,21 @@ func createCourse(w http.ResponseWriter, r *http.Request) {
 	// what if body has empty paranthesis"{}", as it would be consider something
 	var course Course // refernece of struct as object
 	_ = json.NewDecoder(r.Body).Decode(&course)
+	fmt.Println("Inserted, :", course.CourseName)
 
 	if course.IsEmpty() {
 		json.NewEncoder(w).Encode("Empty Data{} is not Accepted")
 		return
 	}
-	//TODO: check only if title is duplicate
+	// Check only if title is duplicate
 	// loop, titte matches with course. coursename, JSON
+	for _, courseX := range coursesDB {
+		fmt.Println(courseX)
+		if courseX.CourseName == course.CourseName {
+			json.NewEncoder(w).Encode("Duplicate CourseName is not Accepted")
+			return
+		}
+	}
 
 	// generate random unique id, which would be string according to struct
 	// then append that input of cousre into slice of main Course

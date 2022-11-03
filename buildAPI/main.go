@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -53,7 +54,7 @@ func getOneCourse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// grab id from incoming request
-	params := mux.Vars()
+	params := mux.Vars(r)
 	fmt.Println(params)
 
 	for _, course := range coursesDB {
@@ -62,7 +63,7 @@ func getOneCourse(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	json.NewEncoder(w).Encode("No Course Found for id: ", params["id"])
+	json.NewEncoder(w).Encode(params["id"])
 	return
 }
 
@@ -84,6 +85,8 @@ func createCourse(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode("Empty Data{} is not Accepted")
 		return
 	}
+	//TODO: check only if title is duplicate
+	// loop, titte matches with course. coursename, JSON
 
 	// generate random unique id, which would be string according to struct
 	// then append that input of cousre into slice of main Course
@@ -118,7 +121,7 @@ func updateCourse(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(course)
 			return
 		} else {
-			json.NewEncoder(w).Encode("No Course Found for id:", params["id"])
+			json.NewEncoder(w).Encode(params["id"])
 			return
 		}
 	}
@@ -134,7 +137,7 @@ func deleteOneCourse(w http.ResponseWriter, r *http.Request) {
 	for index, course := range coursesDB {
 		if course.CourseId == params["id"] {
 			coursesDB = append(coursesDB[:index], coursesDB[index+1:]...)
-			json.NewEncoder(w).Encode("Course has been deleted for id:", params["id"])
+			json.NewEncoder(w).Encode(params["id"])
 			return
 			// As deletion happened we have to break the loop as conditon has been satiesfied
 			break
@@ -145,5 +148,21 @@ func deleteOneCourse(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	fmt.Println("API-Courses")
+	r := mux.NewRouter()
 
+	// seeding data for courses
+	coursesDB = append(coursesDB, Course{CourseId: "2", CourseName: "Java", CoursePrice: 5000, Author: &Author{FullName: "Rutesh", Website: "lco.dev"}})
+	coursesDB = append(coursesDB, Course{CourseId: "23", CourseName: "Go", CoursePrice: 1000, Author: &Author{FullName: "Rutesh", Website: "go.dev"}})
+
+	// routing
+	r.HandleFunc("/", serveHome).Methods("GET")
+	r.HandleFunc("/courses", getAllCourses).Methods("GET")
+	r.HandleFunc("/course/{id}", getOneCourse).Methods("GET")
+	r.HandleFunc("/course", createCourse).Methods("POST")
+	r.HandleFunc("/course/{id}", updateCourse).Methods("PUT")
+	r.HandleFunc("/courses/{id}", deleteOneCourse).Methods("DELETE")
+
+	// listen to a port
+	log.Fatal(http.ListenAndServe(":4000", r))
 }
